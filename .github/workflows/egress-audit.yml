@@ -1,0 +1,35 @@
+# Manual: run the published image and record every outbound DNS name / TCP destination.
+name: egress-audit
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Capture
+        run: |
+          sudo apt-get -qq install -y tcpdump >/dev/null
+          sudo tcpdump -i any -nn -l '(udp port 53) or (tcp[tcpflags] & (tcp-syn|tcp-ack) == tcp-syn)' > /tmp/cap.txt 2>/dev/null &
+          sleep 2
+          mkdir w && touch w/.env && cd w
+          docker pull -q ghcr.io/codeman9528/xboard:latest
+          docker run --rm -v $PWD/.env:/www/.env -v $PWD/data:/www/.docker/.data \
+            -e ENABLE_SQLITE=true -e ENABLE_REDIS=true -e ADMIN_ACCOUNT=a@example.com \
+            ghcr.io/codeman9528/xboard:latest php artisan xboard:install > /tmp/install.log 2>&1 || true
+          tail -5 /tmp/install.log
+          docker run -d --name xb -p 7001:7001 -v $PWD/.env:/www/.env -v $PWD/data:/www/.docker/.data \
+            -e docker=true ghcr.io/codeman9528/xboard:latest
+          sleep 60
+          for p in / /api/v1/guest/comm/config /api/v1/guest/plan/fetch; do curl -s -o /dev/null -w "$p %{http_code}\n" localhost:7001$p; done
+          docker exec xb php artisan schedule:run || true
+          docker exec xb php artisan xboard:update || true
+          sleep 90
+          sudo pkill tcpdump || true
+          docker logs xb 2>&1 | tail -15
+      - name: Report
+        run: |
+          echo "== DNS names queried"
+          grep -oE 'A\? [A-Za-z0-9._-]+' /tmp/cap.txt | sort | uniq -c | sort -rn
+          echo "== TCP SYN destinations (host-originated runner noise included)"
+          grep -E 'Flags \[S\]' /tmp/cap.txt | grep -oE '> [0-9.]+\.[0-9]+:' | sort | uniq -c | sort -rn | head -30
