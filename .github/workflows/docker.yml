@@ -1,4 +1,4 @@
-# Lives in the PUBLIC repo codeman9528/Xboard-build (free Actions minutes).
+# Lives in the PUBLIC repo codeman9528/My-Xboard-build (free Actions minutes).
 # Pulls the PRIVATE source repo with a read-only deploy key, builds a multi-arch
 # image and pushes it to ghcr.io/codeman9528/xboard.
 name: docker
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: "Branch/tag/sha of codeman9528/Xboard to build"
+        description: "Branch/tag/sha of codeman9528/My-Xboard to build"
         default: master
   repository_dispatch:
     types: [source-updated]
@@ -25,7 +25,7 @@ jobs:
       - name: Checkout private source
         uses: actions/checkout@v4
         with:
-          repository: codeman9528/Xboard
+          repository: codeman9528/My-Xboard
           ref: ${{ inputs.ref || 'master' }}
           ssh-key: ${{ secrets.PRIVATE_REPO_DEPLOY_KEY }}
           persist-credentials: false
