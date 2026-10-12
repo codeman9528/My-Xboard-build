@@ -1,6 +1,6 @@
 services:
   xboard:
-    image: ghcr.io/codeman9528/xboard:latest
+    image: ghcr.io/codeman9528/my-xboard:latest
     restart: unless-stopped
     network_mode: host
     volumes:

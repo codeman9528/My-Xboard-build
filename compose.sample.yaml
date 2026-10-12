@@ -10,7 +10,7 @@
 # use compose.host.sample.yaml.
 services:
   xboard:
-    image: ghcr.io/codeman9528/xboard:latest
+    image: ghcr.io/codeman9528/my-xboard:latest
     restart: unless-stopped
     ports:
       - "7001:7001"

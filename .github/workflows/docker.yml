@@ -1,6 +1,6 @@
 # Lives in the PUBLIC repo codeman9528/My-Xboard-build (free Actions minutes).
 # Pulls the PRIVATE source repo with a read-only deploy key, builds a multi-arch
-# image and pushes it to ghcr.io/codeman9528/xboard.
+# image and pushes it to ghcr.io/codeman9528/my-xboard.
 name: docker
 
 on:
@@ -40,7 +40,7 @@ jobs:
       - id: chk
         run: |
           SHA=$(git rev-parse --short=7 HEAD); echo "sha=$SHA" >> $GITHUB_OUTPUT
-          if [ "${{ github.event_name }}" = schedule ] && docker buildx imagetools inspect ghcr.io/codeman9528/xboard:$SHA >/dev/null 2>&1; then
+          if [ "${{ github.event_name }}" = schedule ] && docker buildx imagetools inspect ghcr.io/codeman9528/my-xboard:$SHA >/dev/null 2>&1; then
             echo "skip=true" >> $GITHUB_OUTPUT
           fi
 
@@ -64,7 +64,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/codeman9528/xboard
+          images: ghcr.io/codeman9528/my-xboard
           tags: |
             type=raw,value=latest
             type=raw,value=${{ steps.chk.outputs.sha }}

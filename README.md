@@ -1,6 +1,6 @@
 # My-Xboard-build
 
-Public build & install repo for my private Xboard fork. Image: `ghcr.io/codeman9528/xboard`.
+Public build & install repo for my private Xboard fork. Image: `ghcr.io/codeman9528/my-xboard`.
 
 Install:
 
