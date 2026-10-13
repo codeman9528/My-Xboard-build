@@ -1,0 +1,21 @@
+# Manual: pull the published image and show what admin frontend it ships.
+name: inspect-image
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          docker pull -q ghcr.io/codeman9528/my-xboard:latest
+          docker run --rm ghcr.io/codeman9528/my-xboard:latest sh -c '
+            cd /www/public/assets/admin || { echo "NO_ADMIN_DIR"; exit 1; }
+            echo "manifest entries: $(python3 -c "import json;print(len(json.load(open(\"manifest.json\"))))" 2>/dev/null || grep -o "\"file\"" manifest.json | wc -l)"
+            echo "entry js: $(grep -o "assets/index-[A-Za-z0-9_-]*\.js" index.html | head -1)"
+            echo "rolldown (self-built marker): $(grep -c rolldown index.html)"
+            echo "official entry present: $(ls assets/index-CEIYH7i8.js 2>/dev/null | wc -l)"
+            echo "locales: $(ls locales | tr "\n" " ")"
+            echo "admin-src leaked into image: $(ls -d /www/admin-src 2>/dev/null | wc -l)"
+            echo "git head: $(git -C /www log -1 --format=%h)"
+          '
