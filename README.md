@@ -1,6 +1,6 @@
 # My-Xboard-build
 
-Public build & install repo for my private Xboard fork. Image: `ghcr.io/codeman9528/my-xboard`.
+Public build & install repo for my private Xboard fork. The admin frontend is built from the private repo My-Xboard-admin during the image build. Image: `ghcr.io/codeman9528/my-xboard`.
 
 Install:
 

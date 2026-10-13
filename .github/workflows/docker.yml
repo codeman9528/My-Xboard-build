@@ -44,10 +44,33 @@ jobs:
             echo "skip=true" >> $GITHUB_OUTPUT
           fi
 
-      # Submodule (admin frontend) is a public repo; fetch it over https, no key.
+      # Admin frontend: built from the private source repo (codeman9528/My-Xboard-admin)
+      # into public/assets/admin/ of the build context. Only the compiled output
+      # enters the image; admin-src itself is excluded by .dockerignore.
       - if: steps.chk.outputs.skip != 'true'
-        name: Init submodules
-        run: git submodule update --init --recursive --force
+        name: Checkout admin frontend source
+        uses: actions/checkout@v4
+        with:
+          repository: codeman9528/My-Xboard-admin
+          ssh-key: ${{ secrets.ADMIN_DEPLOY_KEY }}
+          path: admin-src
+          persist-credentials: false
+
+      - if: steps.chk.outputs.skip != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: admin-src/package-lock.json
+
+      - if: steps.chk.outputs.skip != 'true'
+        name: Build admin frontend
+        run: |
+          cd admin-src
+          npm ci --no-audit --no-fund
+          XBOARD_PUBLIC_ASSETS_DIR="$GITHUB_WORKSPACE/public/assets/admin" npm run build
+          test -f "$GITHUB_WORKSPACE/public/assets/admin/manifest.json"
+          ls "$GITHUB_WORKSPACE/public/assets/admin/locales"
 
       - if: steps.chk.outputs.skip != 'true'
         name: Stamp version
